@@ -12,9 +12,74 @@
             zoom: 6,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         }
-        var map = new google.maps.Map(mapCanvas, mapOptions)
+        map = new google.maps.Map(mapCanvas, mapOptions)
+
+        google.maps.event.addListener(map, "rightclick", function (event) {
+            var lat = event.latLng.lat();
+            var lng = event.latLng.lng();
+            alert(lat.toFixed(2) + ", " + lng.toFixed(2));
+        });
+
+        var myLatLng = new google.maps.LatLng(50.43, 30.63);
+        var marker = new google.maps.Marker({
+            position: myLatLng,
+            map: map,
+            icon: "{{ url_for('static', filename='icons/map/map-marker-7-64x64.png') }}"
+        });
+
+
+        var myLatLng = new google.maps.LatLng(50.22, 34.19);
+        var marker = new google.maps.Marker({
+            position: myLatLng,
+            map: map,
+            icon: "{{ url_for('static', filename='icons/map/map-marker-11-64x64.png') }}"
+        });
+
+        var myLatLng = new google.maps.LatLng(49.87, 26.06);
+        var marker = new google.maps.Marker({
+            position: myLatLng,
+            map: map,
+            icon: "{{ url_for('static', filename='icons/map/map-marker-20-64x64.png') }}"
+        });
     }
+
     google.maps.event.addDomListener(window, 'load', initialize);
+
+    $(document).ready(function () {
+        $('#toggle').click(function () {
+            if ($('#sidebar').hasClass('open')) {
+                $('#sidebar').removeClass('col-md-2');
+                $('#sidebar').removeClass('open');
+                $('#sidebar').addClass('hidden');
+                $('#content').addClass('col-md-12');
+                $('#content').removeClass('col-md-10');
+                google.maps.event.trigger(map, "resize");
+            }
+            else {
+                $('#sidebar').addClass('col-md-2');
+                $('#sidebar').addClass('open');
+                $('#sidebar').removeClass('hidden');
+                $('#content').removeClass('col-md-12');
+                $('#content').addClass('col-md-10');
+                google.maps.event.trigger(map, "resize");
+            }
+        });
+    });
 </script>
-<div id="map-canvas"></div>
+
+<div class="row">
+    <div id="content" class="col-md-10">
+        <div id="map-canvas"></div>
+        <a id="toggle">Toggle</a>
+    </div>
+    <div id="sidebar" class="col-md-2 open">
+        <p>Marker Data</p>
+
+        <p>Marker Data</p>
+
+        <p>Marker Data</p>
+
+    </div>
+</div>
+
 {% endblock %}
