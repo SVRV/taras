@@ -16,8 +16,9 @@
         map = new google.maps.Map(mapCanvas, mapOptions)
 
         var markers = [];
+        var markersStudy = [];
 
-        {% for entity, rows in data.iteritems() if entity == 'study' %}
+        {% for entity, rows in data.iteritems() %}
             {% for item in rows %}
                  var marker = new google.maps.Marker({
                      position: new google.maps.LatLng({{ item.lat }}, {{ item.long }}),
@@ -42,9 +43,28 @@
                     }).open(map,this);
                 });
 
+                {% if entity == "study" %}
+                    markersStudy.push({
+                        "marker": marker,
+                        "large": marker.getIcon(),
+                        "small": "{{ url_for('static', filename='icons/map/study/bm32_' + item.master_label + '.png') }}"
+                    })
+                {% endif %}
+
                 markers.push(marker);
             {% endfor %}
         {% endfor %}
+
+        google.maps.event.addListener(map, 'zoom_changed', function() {
+            for (var i = 0; i < markersStudy.length; i++) {
+                if (map.getZoom() >= 15) {
+                    markersStudy[i]['marker'].setIcon(markersStudy[i]['small']);
+                } else {
+                    markersStudy[i]['marker'].setIcon(markersStudy[i]['large']);
+                }
+
+            }
+        });
 
         var markerCluster = new MarkerClusterer(map, markers);
     }
@@ -71,19 +91,34 @@
             }
         });
     });
+
+
+
 </script>
 <div class="row">
     <div id="content" class="col-md-10">
         <div id="map-canvas"></div>
-        <a id="toggle">Toggle</a>
     </div>
     <div id="sidebar" class="col-md-2 open">
-        <p>Marker Data</p>
-
-        <p>Marker Data</p>
-
-        <p>Marker Data</p>
-
+        <div class="checkbox">
+            <label><input checked="checked" type="checkbox" value="">Бакалаврат</label>
+        </div>
+        <div class="checkbox">
+            <label><input checked="checked" type="checkbox" value="">Магістратура</label>
+        </div>
+        <p class="text-muted mdesc">Геодезія</p>
+        <p class="text-muted mdesc">Картографія</p>
+        <p class="text-muted mdesc">Землеустрій і кадастр</p>
+        <p class="text-muted mdesc">Оцінка землі та нерухомого майна</p>
+        <p class="text-muted mdesc">Геоінформаційні системи та технології</p>
+        <p class="text-muted mdesc">Фотограмметрія та ДЗЗ</p>
+        <p class="text-muted mdesc">Космічний моніторинг Землі</p>
+        <div class="checkbox">
+            <label><input checked="checked" type="checkbox" value="">Компанії, організації та підприемства</label>
+        </div>
+        <div class="checkbox">
+            <label><input checked="checked" type="checkbox" value="">Науково-виробничі установи</label>
+        </div>
     </div>
 </div>
 

@@ -30,9 +30,6 @@
 
     {% set navigation_bar = [
     (url_for('google_map'), 'map', 'Карта'),
-    (url_for('demand'), 'demand', 'Запити'),
-    (url_for('ads'), 'ads', 'Оголошення'),
-    (url_for('apps'), 'apps', 'Завантаження'),
     (url_for('extra'), 'extra', 'Додатки')
     ] -%}
 
@@ -45,9 +42,8 @@
 
     {% block body %}{% endblock %}
 </div>
-<footer>
+<footer class="footer">
     <div class="container">
-        <div class="clearfix"></div>
         <p class="pull-right">Taras Dubrava, VI course</p>
         <div class="clearfix"></div>
         <p class="pull-right">Taras Shevchenko National University of Kiev</p>
