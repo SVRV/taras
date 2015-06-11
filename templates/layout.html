@@ -23,13 +23,16 @@
     <title>S.A.P.I.G.S.</title>
 </head>
 <body>
-<div class="container">
+<div class="container fill main-col">
     <div class="jumbotron">
         <h2>НАВЧАННЯ ТА ВИРОБНИЦТВО В ГАЛУЗІ ЗНАНЬ <br/> "ГЕОДЕЗІЯ ТА ЗЕМЛЕУСТРІЙ"</h2>
     </div>
 
     {% set navigation_bar = [
     (url_for('google_map'), 'map', 'Карта'),
+    (url_for('demand'), 'demand', 'Запити'),
+    (url_for('ads'), 'ads', 'Оголошення'),
+    (url_for('apps'), 'apps', 'Завантаження'),
     (url_for('extra'), 'extra', 'Додатки')
     ] -%}
 
@@ -43,14 +46,16 @@
     {% block body %}{% endblock %}
 </div>
 <footer class="footer">
-    <div class="container">
-        <p class="pull-right">Taras Dubrava, VI course</p>
+    <div class="container main-col-footer">
+        <p class="pull-right">Дубрава Тарас, VI курс</p>
         <div class="clearfix"></div>
-        <p class="pull-right">Taras Shevchenko National University of Kiev</p>
+        <p class="pull-right">Київський національний університет імені Тараса Шевченка</p>
         <div class="clearfix"></div>
-        <p class="pull-right fa fa-facebook-square"><a href="https://www.facebook.com/tarassara" target="_blank">Facebook URL</a></p>
+        <p class="pull-right fa fa-facebook-square"><a href="https://www.facebook.com/tarassara" target="_blank">Facebook</a></p>
         <div class="clearfix"></div>
-        <p class="pull-right">uakievtaras@gmail.com, +380638922752</p>
+        <p class="pull-right"><a href="mailto:uakievtaras@gmail.com">uakievtaras@gmail.com</a>, +380638922752</p>
+        <div class="clearfix"></div>
+        <p class="pull-right">© 2015</p>
     </div>
 </footer>
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

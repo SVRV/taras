@@ -6,7 +6,6 @@ app = Flask(__name__)
 @app.route('/')
 def google_map():
     files = {'study': 'study.csv', 'science': 'science.csv', 'work': 'work.csv'}
-
     data = {}
     for filename, filepath in files.iteritems():
         file = csv.reader(open(os.path.dirname(os.path.realpath(__file__)) + '/files/' + filepath, 'r'))
