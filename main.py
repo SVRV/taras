@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-import csv
+import os, csv
 
 app = Flask(__name__)
 
@@ -9,7 +9,7 @@ def google_map():
 
     data = {}
     for filename, filepath in files.iteritems():
-        file = csv.reader(open('files/' + filepath, 'r'))
+        file = csv.reader(open(os.path.dirname(os.path.realpath(__file__)) + '/files/' + filepath, 'r'))
         headers = file.next()
         entries = []
         for line in file:

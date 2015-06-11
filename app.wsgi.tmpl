@@ -1,0 +1,10 @@
+activate_this = '/home/krasilich/.virtualenvs/taras/bin/activate_this.py'
+
+execfile(activate_this, dict(__file__=activate_this))
+
+import sys
+sys.path.insert(0, '/home/krasilich/python/taras/')
+
+from main import app as application
+import logging, sys
+logging.basicConfig(stream=sys.stderr)
