@@ -4,7 +4,40 @@
 <script src="https://maps.googleapis.com/maps/api/js"></script>
 <script src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js"></script>
 <script>
-    function initialize() {
+    var entities = {};
+    var image, image_high_zoom;
+    var exclude_entities = [];
+
+    {% for entity, rows in data.iteritems() %}
+        entities["{{entity}}"] = []
+        {% for item in rows %}
+            {% if entity == "work" %}
+                image = "{{ url_for('static', filename='icons/map/work32.png') }}"
+                image_high_zoom = ''
+            {% elif entity == "science" %}
+                image = "{{ url_for('static', filename='icons/map/science32.png') }}"
+                image_high_zoom = ''
+            {% elif entity == "study" %}
+                {% if item.master_count|int > 0 %}
+                   image = "{{ url_for('static', filename='icons/map/study/bm32.png') }}"
+                {% else %}
+                   image = "{{ url_for('static', filename='icons/map/study/b32.png') }}"
+                {% endif %}
+                image_high_zoom = "{{ url_for('static', filename='icons/map/study/bm32_' + item.master_label + '.png') }}"
+            {% endif %}
+
+            entities["{{entity}}"].push({
+                "lat": {{ item.lat }},
+                "long": {{ item.long }},
+                "description": '{{ item.description|safe|replace("\n", "\\n") }}',
+                "image": image,
+                "image_high_zoom": image_high_zoom
+            })
+        {% endfor %}
+    {% endfor %}
+
+    function init() {
+        var markers = [];
         var mapCanvas = document.getElementById('map-canvas');
         var mapOptions = {
             center: new google.maps.LatLng(
@@ -12,64 +45,49 @@
             ),
             zoom: 6,
             mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(mapCanvas, mapOptions)
+
+        for (var entity in entities) {
+            if (entities.hasOwnProperty(entity) && exclude_entities.indexOf(entity) < 0) {
+                var items = entities[entity]
+
+                for (var i = 0; i < items.length; i++) {
+                    var marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(items[i].lat, items[i].long),
+                        map: map,
+                        icon: items[i].image,
+                        description: items[i].description
+                    });
+
+                    items[i]['marker'] = marker;
+                    markers.push(marker)
+                }
+            }
         }
-        map = new google.maps.Map(mapCanvas, mapOptions)
-
-        var markers = [];
-        var markersStudy = [];
-
-        {% for entity, rows in data.iteritems() %}
-            {% for item in rows %}
-                 var marker = new google.maps.Marker({
-                     position: new google.maps.LatLng({{ item.lat }}, {{ item.long }}),
-                     map: map,
-                 });
-
-                 {% if entity == "work" %}
-                    marker.setIcon("{{ url_for('static', filename='icons/map/work32.png') }}")
-                 {% elif entity == "science" %}
-                    marker.setIcon("{{ url_for('static', filename='icons/map/science32.png') }}")
-                 {% elif entity == "study" %}
-                     {% if item.master_count|int > 0 %}
-                        marker.setIcon("{{ url_for('static', filename='icons/map/study/bm32.png') }}")
-                     {% else %}
-                        marker.setIcon("{{ url_for('static', filename='icons/map/study/b32.png') }}")
-                     {% endif %}
-                 {% endif %}
-
-                google.maps.event.addListener(marker, 'click', function() {
-                    new google.maps.InfoWindow({
-                        content: '{{ item.description|safe|replace("\n", "\\n") }}'
-                    }).open(map,this);
-                });
-
-                {% if entity == "study" %}
-                    markersStudy.push({
-                        "marker": marker,
-                        "large": marker.getIcon(),
-                        "small": "{{ url_for('static', filename='icons/map/study/bm32_' + item.master_label + '.png') }}"
-                    })
-                {% endif %}
-
-                markers.push(marker);
-            {% endfor %}
-        {% endfor %}
 
         google.maps.event.addListener(map, 'zoom_changed', function() {
-            for (var i = 0; i < markersStudy.length; i++) {
-                if (map.getZoom() >= 15) {
-                    markersStudy[i]['marker'].setIcon(markersStudy[i]['small']);
-                } else {
-                    markersStudy[i]['marker'].setIcon(markersStudy[i]['large']);
+            for (var entity in entities) {
+                if (entities.hasOwnProperty(entity)) {
+                    var items = entities[entity]
+                    for (var i = 0; i < items.length; i++) {
+                        if (!items[i].image_high_zoom) {
+                            continue;
+                        }
+                        if (map.getZoom() >= 15) {
+                            items[i]['marker'].setIcon(items[i]['image_high_zoom']);
+                        } else {
+                            items[i]['marker'].setIcon(items[i]['image']);
+                        }
+                    }
                 }
-
             }
         });
 
         var markerCluster = new MarkerClusterer(map, markers);
     }
 
-    google.maps.event.addDomListener(window, 'load', initialize);
+    google.maps.event.addDomListener(window, 'load', init);
 
     $(document).ready(function () {
         $('#toggle').click(function () {
