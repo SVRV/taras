@@ -18,7 +18,10 @@ body {
 }
 
 .main-col {
-  background-color: #FFF
+  background-color: #FFF;
+  height: auto;
+  min-height: 100%;
+  padding-bottom: 140px;
 }
 
 .main-col-footer {
@@ -30,11 +33,7 @@ div.jumbotron {
 }
 
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 140px;
-  background-color: ##003366
+    margin-top: -140px
 }
 
 #map-canvas {
