@@ -5,11 +5,12 @@
 <script src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js"></script>
 <script>
     var entities = {};
-    var image, image_high_zoom;
+    var entity, image, image_high_zoom;
     var exclude_entities = [];
 
     {% for entity, rows in data.iteritems() %}
         entities["{{entity}}"] = []
+        entity = "{{entity}}";
         {% for item in rows %}
             {% if entity == "work" %}
                 image = "{{ url_for('static', filename='icons/map/work32.png') }}"
@@ -20,13 +21,16 @@
             {% elif entity == "study" %}
                 {% if item.master_count|int > 0 %}
                    image = "{{ url_for('static', filename='icons/map/study/bm32.png') }}"
+                   entity = "master";
                 {% else %}
                    image = "{{ url_for('static', filename='icons/map/study/b32.png') }}"
+                   entity = "bachelor";
                 {% endif %}
                 image_high_zoom = "{{ url_for('static', filename='icons/map/study/bm32_' + item.master_label + '.png') }}"
             {% endif %}
 
             entities["{{entity}}"].push({
+                "entity": entity,
                 "lat": {{ item.lat }},
                 "long": {{ item.long }},
                 "description": '{{ item.description|safe|replace("\n", "\\n") }}',
@@ -36,28 +40,46 @@
         {% endfor %}
     {% endfor %}
 
-    function init() {
+    function init(center, zoom) {
+        if (typeof center == "undefined" || center instanceof Event) {
+            var center = new google.maps.LatLng(
+                    48.23, 31.11
+            )
+        }
+
+        if (typeof zoom == "undefined") {
+            var zoom = 6;
+        }
+
         var markers = [];
         var mapCanvas = document.getElementById('map-canvas');
         var mapOptions = {
-            center: new google.maps.LatLng(
-                    48.23, 31.11
-            ),
-            zoom: 6,
+            center: center,
+            zoom: zoom,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
-        var map = new google.maps.Map(mapCanvas, mapOptions)
+        map = new google.maps.Map(mapCanvas, mapOptions)
 
         for (var entity in entities) {
-            if (entities.hasOwnProperty(entity) && exclude_entities.indexOf(entity) < 0) {
+            if (entities.hasOwnProperty(entity)) {
                 var items = entities[entity]
 
                 for (var i = 0; i < items.length; i++) {
+                    if (exclude_entities.indexOf(items[i].entity) >= 0) {
+                        continue;
+                    }
+
                     var marker = new google.maps.Marker({
                         position: new google.maps.LatLng(items[i].lat, items[i].long),
                         map: map,
                         icon: items[i].image,
                         description: items[i].description
+                    });
+
+                    google.maps.event.addListener(marker, 'click', function() {
+                        new google.maps.InfoWindow({
+                            content: this.description
+                        }).open(map, this);
                     });
 
                     items[i]['marker'] = marker;
@@ -89,7 +111,27 @@
 
     google.maps.event.addDomListener(window, 'load', init);
 
+
+
+
+
+    $($('input:checkbox').get(0)).is(':checked')
+
     $(document).ready(function () {
+        $('input:checkbox').change(function() {
+            var value = $(this).val();
+            var index = exclude_entities.indexOf(value);
+
+            if (index >= 0) {
+                delete exclude_entities[index];
+            } else {
+                exclude_entities.push(value)
+            }
+
+            init(map.getCenter(), map.getZoom());
+        });
+
+
         $('#toggle').click(function () {
             if ($('#sidebar').hasClass('open')) {
                 $('#sidebar').removeClass('col-md-2');
@@ -119,10 +161,10 @@
     </div>
     <div id="sidebar" class="col-md-2 open">
         <div class="checkbox">
-            <label><input checked="checked" type="checkbox" value=""><img class="legend-image" src="{{ url_for('static', filename='icons/map/study/b32.png') }}" /><span>Бакалаврат</span></label>
+            <label><input checked="checked" type="checkbox" value="bachelor"><img class="legend-image" src="{{ url_for('static', filename='icons/map/study/b32.png') }}" /><span>Бакалаврат</span></label>
         </div>
         <div class="checkbox">
-            <label><input checked="checked" type="checkbox" value=""><img class="legend-image" src="{{ url_for('static', filename='icons/map/study/bm32.png') }}" /><span>Магістратура</span></label>
+            <label><input checked="checked" type="checkbox" value="master"><img class="legend-image" src="{{ url_for('static', filename='icons/map/study/bm32.png') }}" /><span>Магістратура</span></label>
         </div>
         <p class="text-muted mdesc"><img class="legend-image" src="{{ url_for('static', filename='icons/map/study/master/1.png') }}" /><span>Геодезія</span></p>
         <p class="text-muted mdesc"><img class="legend-image" src="{{ url_for('static', filename='icons/map/study/master/2.png') }}" /><span>Картографія</span></p>
@@ -132,10 +174,10 @@
         <p class="text-muted mdesc"><img class="legend-image" src="{{ url_for('static', filename='icons/map/study/master/6.png') }}" /><span>Фотограмметрія та ДЗЗ</span></p>
         <p class="text-muted mdesc"><img class="legend-image" src="{{ url_for('static', filename='icons/map/study/master/7.png') }}" /><span>Космічний моніторинг Землі</span></p>
         <div class="checkbox">
-            <label><input checked="checked" type="checkbox" value=""><img class="legend-image" src="{{ url_for('static', filename='icons/map/work32.png') }}" /><span>Компанії, організації та підприемства</span></label>
+            <label><input checked="checked" type="checkbox" value="work"><img class="legend-image" src="{{ url_for('static', filename='icons/map/work32.png') }}" /><span>Компанії, організації та підприемства</span></label>
         </div>
         <div class="checkbox">
-            <label><input checked="checked" type="checkbox" value=""><img class="legend-image" src="{{ url_for('static', filename='icons/map/science32.png') }}" /><span>Науково-виробничі установи</span></label>
+            <label><input checked="checked" type="checkbox" value="science"><img class="legend-image" src="{{ url_for('static', filename='icons/map/science32.png') }}" /><span>Науково-виробничі установи</span></label>
         </div>
     </div>
 </div>
