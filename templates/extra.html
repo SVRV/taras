@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 {% set active_page = "extra" %}
 {% block body %}
-<p>Extra</p>
+<div class="row">
+    <div id="content" class="col-md-12">
+        <a href="{{ url_for('static', filename='extra/1.jpg') }}" download><img class="extra_img" src="{{ url_for('static', filename='extra/1.jpg') }}" /></a>
+        <a href="{{ url_for('static', filename='extra/2.jpg') }}" download><img class="extra_img" src="{{ url_for('static', filename='extra/2.jpg') }}" /></a>
+        <a href="{{ url_for('static', filename='extra/3.jpg') }}" download><img class="extra_img" src="{{ url_for('static', filename='extra/3.jpg') }}" /></a>
+        <a href="{{ url_for('static', filename='extra/4.jpg') }}" download><img class="extra_img" src="{{ url_for('static', filename='extra/4.jpg') }}" /></a>
+    </div>
+</div>
 {% endblock %}
